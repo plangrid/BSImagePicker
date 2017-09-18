@@ -46,12 +46,13 @@ open class BSImagePickerViewController : UINavigationController {
     /**
      Default selections
      */
-    private var defaultSelections: PHFetchResult<PHAsset>?
+    open var defaultSelections: PHFetchResult<PHAsset>?
     
     /**
      Fetch results.
      */
-    private lazy var fetchResults: [PHFetchResult] = { () -> [PHFetchResult<PHAssetCollection>] in
+    
+    open lazy var fetchResults: [PHFetchResult] = { () -> [PHFetchResult<PHAssetCollection>] in
         let fetchOptions = PHFetchOptions()
         
         // Camera roll fetch result
@@ -130,6 +131,8 @@ open class BSImagePickerViewController : UINavigationController {
 
 // MARK: ImagePickerSettings proxy
 extension BSImagePickerViewController: BSImagePickerSettings {
+
+
     /**
      See BSImagePicketSettings for documentation
      */
@@ -199,6 +202,18 @@ extension BSImagePickerViewController: BSImagePickerSettings {
         }
         set {
             settings.selectionTextAttributes = newValue
+        }
+    }
+    
+    /**
+     BackgroundColor
+     */
+    public var backgroundColor: UIColor {
+        get {
+            return settings.backgroundColor
+        }
+        set {
+            settings.backgroundColor = newValue
         }
     }
     
