@@ -105,7 +105,7 @@ final class PhotosViewController : UICollectionViewController {
         super.loadView()
         
         // Setup collection view
-        collectionView?.backgroundColor = UIColor.white
+        collectionView?.backgroundColor = settings.backgroundColor
         collectionView?.allowsMultipleSelection = true
         
         // Set an empty title to get < back button
@@ -230,38 +230,56 @@ final class PhotosViewController : UICollectionViewController {
     
     // MARK: Private helper methods
     func updateDoneButton() {
+        guard let photosDataSource = photosDataSource else { return }
+
+        guard let navigationBar = self.navigationController?.navigationBar else {
+            // just manually update the button title
+            return
+        }
+
+        guard let btn = diveForRightButton(inSubviewsOf: navigationBar) else {
+            // just manually update the button title
+            return
+        }
+
+        // Store original title if we havn't got it
+        if doneBarButtonTitle == nil {
+            doneBarButtonTitle = btn.title(for: UIControlState())
+        }
+
+        // Update title
+        guard let doneBarButtonTitle = doneBarButtonTitle else {
+            // just manually update the button title
+            return
+        }
+
+        // Special case if we have selected 1 image and that is
+        // the max number of allowed selections
+        if (photosDataSource.selections.count == 1 && self.settings.maxNumberOfSelections == 1) {
+            btn.bs_setTitleWithoutAnimation("\(doneBarButtonTitle)", forState: UIControlState())
+        } else if photosDataSource.selections.count > 0 {
+            btn.bs_setTitleWithoutAnimation("\(doneBarButtonTitle) (\(photosDataSource.selections.count))", forState: UIControlState())
+        } else {
+            btn.bs_setTitleWithoutAnimation(doneBarButtonTitle, forState: UIControlState())
+        }
+
+        // Enabled?
+        doneBarButton?.isEnabled = photosDataSource.selections.count > 0
+
+        self.navigationController?.navigationBar.setNeedsLayout()
+    }
+
+    func diveForRightButton(inSubviewsOf superview: UIView) -> UIButton? {
         // Find right button
-        if let subViews = navigationController?.navigationBar.subviews, let photosDataSource = photosDataSource {
-            for view in subViews {
-                if let btn = view as? UIButton , checkIfRightButtonItem(btn) {
-                    // Store original title if we havn't got it
-                    if doneBarButtonTitle == nil {
-                        doneBarButtonTitle = btn.title(for: UIControlState())
-                    }
-                    
-                    // Update title
-                    if let doneBarButtonTitle = doneBarButtonTitle {
-                        // Special case if we have selected 1 image and that is
-                        // the max number of allowed selections
-                        if (photosDataSource.selections.count == 1 && self.settings.maxNumberOfSelections == 1) {
-                            btn.bs_setTitleWithoutAnimation("\(doneBarButtonTitle)", forState: UIControlState())
-                        } else if photosDataSource.selections.count > 0 {
-                            btn.bs_setTitleWithoutAnimation("\(doneBarButtonTitle) (\(photosDataSource.selections.count))", forState: UIControlState())
-                        } else {
-                            btn.bs_setTitleWithoutAnimation(doneBarButtonTitle, forState: UIControlState())
-                        }
-                        
-                        // Enabled?
-                        doneBarButton?.isEnabled = photosDataSource.selections.count > 0
-                    }
-                    
-                    // Stop loop
-                    break
-                }
+        for view in superview.subviews {
+            if let btn = view as? UIButton, checkIfRightButtonItem(btn) {
+                return btn
+            } else if let btn = diveForRightButton(inSubviewsOf: view) {
+                return btn
             }
         }
 
-        self.navigationController?.navigationBar.setNeedsLayout()
+        return nil
     }
     
     // Check if a give UIButton is the right UIBarButtonItem in the navigation bar
