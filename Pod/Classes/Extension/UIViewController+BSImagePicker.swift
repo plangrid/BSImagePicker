@@ -39,7 +39,7 @@ public extension UIViewController {
         - parameter completion: presentation completed closure or nil
         - parameter hitLimit: Closure to call when user hits selection limit or nil
     */
-    func bs_presentImagePickerController(_ imagePicker: BSImagePickerViewController, animated: Bool, select: ((_ asset: PHAsset) -> Void)?, deselect: ((_ asset: PHAsset) -> Void)?, cancel: (([PHAsset]) -> Void)?, finish: (([PHAsset]) -> Void)?, completion: (() -> Void)?, hitLimit: ((Int) -> Void)? = nil) {
+    @objc func bs_presentImagePickerController(_ imagePicker: BSImagePickerViewController, animated: Bool, select: ((_ asset: PHAsset) -> Void)?, deselect: ((_ asset: PHAsset) -> Void)?, cancel: (([PHAsset]) -> Void)?, finish: (([PHAsset]) -> Void)?, completion: (() -> Void)?, hitLimit: ((Int) -> Void)? = nil) {
         BSImagePickerViewController.authorize(fromViewController: self) { (authorized) -> Void in
             // Make sure we are authorized before proceding
             guard authorized == true else { return }
