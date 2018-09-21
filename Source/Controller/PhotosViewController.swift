@@ -49,9 +49,7 @@ final class PhotosViewController : UICollectionViewController {
     @objc var deselectionClosure: ((_ asset: PHAsset) -> Void)?
     @objc var cancelClosure: ((_ assets: [PHAsset]) -> Void)?
     @objc var finishClosure: ((_ assets: [PHAsset]) -> Void)?
-    
-    // IP-1131, for notifying when hitting selection limit
-    @objc var hitLimitClosure: ((_ selectionLimit: Int) -> Void)?
+    @objc var selectLimitReachedClosure: ((_ selectionLimit: Int) -> Void)?
     
     @objc var doneBarButton: UIBarButtonItem?
     @objc var cancelBarButton: UIBarButtonItem?
@@ -299,17 +297,6 @@ extension PhotosViewController {
             return false
         }
 
-		// IP-1131 - If hitting limit, call optional closure
-        let underLimit = photosDataSource!.selections.count < settings.maxNumberOfSelections
-        if !(collectionView.isUserInteractionEnabled && underLimit) {
-            if let closure = hitLimitClosure, !underLimit {
-                DispatchQueue.global().async {
-                    closure(self.settings.maxNumberOfSelections)
-                }
-            }
-            return false
-        }
-
         // Make sure we have a data source and that we can make selections
         guard let photosDataSource = photosDataSource, collectionView.isUserInteractionEnabled else { return false }
 
@@ -366,6 +353,11 @@ extension PhotosViewController {
                 DispatchQueue.global().async {
                     closure(asset)
                 }
+            }
+        } else if photosDataSource.selections.count >= settings.maxNumberOfSelections,
+            let closure = selectLimitReachedClosure {
+            DispatchQueue.global().async {
+                closure(self.settings.maxNumberOfSelections)
             }
         }
 
